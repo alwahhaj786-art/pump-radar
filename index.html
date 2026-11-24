@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pump Radar</title>
+<style>
+body{background:#0b0e14;color:#fff;font-family:Arial;padding:15px}
+h1{text-align:center;color:#f0b90b}
+.card{background:#161b22;border:1px solid #333;border-radius:12px;padding:12px;margin:10px 0;display:flex;justify-content:space-between}
+.up{color:#00ff88;font-weight:bold}
+small{color:#aaa}
+button{background:#f0b90b;border:0;padding:10px 15px;border-radius:8px;font-weight:bold;width:100%}
+#status{text-align:center;color:#aaa;margin:10px}
+</style>
+</head>
+<body>
+<h1>🚀 Pump Radar</h1>
+<p style="text-align:center">باينس سبوت - USDT - ارتفاع +20%</p>
+<button onclick="load()">تحديث الآن 🔄</button>
+<div id="status">جاري التحميل...</div>
+<div id="list"></div>
+<script>
+async function load(){
+ document.getElementById('status').innerText='جاري الفحص...';
+ try{
+  let r=await fetch('https://data-api.binance.vision/api/v3/ticker/24hr');
+  let data=await r.json();
+  let pumps=data.filter(c=>c.symbol.endsWith('USDT') && !c.symbol.includes('UPUSDT') && !c.symbol.includes('DOWNUSDT') && parseFloat(c.priceChangePercent)>=20)
+  .sort((a,b)=>parseFloat(b.priceChangePercent)-parseFloat(a.priceChangePercent));
+  document.getElementById('status').innerText='تم الفحص: '+new Date().toLocaleTimeString('ar-EG')+' | عدد الـ Pumps: '+pumps.length;
+  document.getElementById('list').innerHTML=pumps.length? pumps.map(c=>`<div class="card"><div><b>${c.symbol}</b><br><small>السعر: ${parseFloat(c.lastPrice)}<br>حجم: $${Math.round(parseFloat(c.quoteVolume)).toLocaleString()}</small></div><div class="up">+${parseFloat(c.priceChangePercent).toFixed(2)}%</div></div>`).join('') : '<p style="text-align:center">لا يوجد Pump +20% الآن</p>';
+ }catch(e){ document.getElementById('status').innerText='خطأ في الاتصال، حاول مرة ثانية'; }
+}
+load();
+setInterval(load,60000);
+</script>
+</body>
+</html>
